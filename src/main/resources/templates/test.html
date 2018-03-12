@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UT4 Player card parser</title>
+    <style>
+        body {
+            background-color: #222;
+            color: #ddd;
+            padding: 30px;
+            font-family: sans-serif;
+        }
+
+        form {
+            margin-bottom: 30px;
+        }
+
+        input {
+            padding: 10px;
+        }
+
+        a {
+            color: aquamarine;
+        }
+
+        a:hover {
+            color: darkcyan;
+        }
+
+        pre {
+            font-size: 15px;
+            color: cornflowerblue;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            padding-bottom: 30px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>UT4 Player card parser</h1>
+    <p>Enter the player id:</p>
+    <form>
+        <input name="playerId" type="text" placeholder="Player ID"/>
+        <input type="submit"/>
+    </form>
+    <div th:if="${id}">
+        <div>
+            Selected id: <pre>[[${id}]]</pre>
+            <div>
+            </div>
+            Player name: <pre>[[${name}]]</pre>
+        </div>
+        <br />
+
+        <div th:if="${name}">
+            <div>
+                <a th:href="@{'/' + ${id} + '/json'}">Click here to get the stats in a JSON format.</a>
+            </div>
+            <div>
+                <a th:href="@{'https://www.epicgames.com/unrealtournament/playerCard?playerId=' + ${id}}" href="https://www.epicgames.com/unrealtournament/playerCard?playerId=[[${id}]]">View the original stats.</a>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="footer">
+        <div>
+            Created by skandalouz for the UT4 community. You can find me on Discord as skandalouz#1109
+        </div>
+        <div>
+            This project is in no way affiliated with Epic Games.
+        </div>
+        <div>
+            The source code for this project is available at <a href="https://github.com/ut-community/playercards">Github</a>
+        </div>
+    </div>
+</body>
+</html>
