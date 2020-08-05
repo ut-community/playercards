@@ -1,5 +1,10 @@
 package utcommunity.playercards;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,9 +13,6 @@ import utcommunity.playercards.domain.PlayerStat;
 import utcommunity.playercards.domain.PlayerStats;
 import utcommunity.playercards.domain.StatGametype;
 import utcommunity.playercards.domain.StatLevel;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class Reader {
@@ -61,48 +63,49 @@ public class Reader {
     }
 
     public String readName(Document doc) {
-        return doc.select(".displayName .playerName").text();
+        return doc.select(".playerHeader .headerRow").get(0).text();
     }
 
     public String readCountry(Document doc) {
-        return doc.select(".unreal .playerFlag").get(1).text();
+        return doc.select(".playerHeader .headerRow").get(1).text();
     }
 
     public int readLevel(Document doc) {
-        String level = doc.select(".xpContainer .xpLevelClass").get(0).text();
+        String level = doc.select(".xpLevelClass").get(0).text();
         return Integer.parseInt(level);
     }
 
     public int readTotalXp(Document doc) {
-        String xp = remove(doc.select(".xpContainer .rankRow").get(0).child(2).text(), "(", ",", " XP Total)");
+        String xp = remove(
+            doc.select(".playerProgress .rankRow").get(0).select(">div").get(2).text(),
+            "(", ",", " XP Total)"
+        );
         return Integer.parseInt(xp);
     }
 
     public int readProgressInThisLevel(Document doc) {
-        Element progressXp = doc.select(".progressContainer").get(0);
-        String  text       = remove(progressXp.select(".xpDataColumn").text(), ",");
+        String text = doc.select(".playerProgress .rankRow").get(1).select(".xpDataLabel").get(0).text();
         return Integer.parseInt(text);
     }
 
     public int readProgressToNextLevel(Document doc) {
-        Element progressXp = doc.select(".progressContainer").get(0);
-        String  text       = remove(progressXp.select(".xpNeededValue").text(), ",");
+        String text = doc.select(".playerProgress .rankRow").get(1).select(".xpDataLabel").get(1).text();
         return Integer.parseInt(text);
     }
 
     public int readYellowStars(Document doc) {
-        String text = doc.select(".progressContainer .challengeValue1").text();
+        String text = doc.select(".playerProgress .rankRow").get(2).select(".challengeValue").get(0).text();
         return Integer.parseInt(text);
     }
 
     public int readBlueStars(Document doc) {
-        String text = doc.select(".progressContainer .challengeValue2").text();
+        String text = doc.select(".playerProgress .rankRow").get(2).select(".challengeValue").get(1).text();
         return Integer.parseInt(text);
     }
 
     private List<PlayerStat> readPlayerStats(Document doc) {
         List<PlayerStat> list = new ArrayList<>();
-        for (Element rankRow : doc.select(".rankContainer .rankRow")) {
+        for (Element rankRow : doc.select(".playerRank .rankRow")) {
             PlayerStat playerStat = new PlayerStat();
             playerStat.setGametype(readStatGametype(rankRow));
             playerStat.setLevel(readStatLevel(rankRow));
@@ -129,7 +132,9 @@ public class Reader {
     private int readRating(Element rankRow) {
         Element element = rankRow.select(".levelColumn .skillRatingLevel").get(0);
         String  text    = element.text();
-        return Integer.parseInt(text);
+        return new BigDecimal(text)
+            .setScale(0, RoundingMode.HALF_EVEN)
+            .intValue();
     }
 
     private int readElo(Element rankRow) {
