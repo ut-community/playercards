@@ -3,7 +3,6 @@ package utcommunity.playercards;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,14 +20,18 @@ public class PlayerCardsController {
     private Reader reader;
 
     @GetMapping(path = {"/", "/{optionalId}"})
-    public String page(Map<String, Object> model, @PathVariable Optional<String> optionalId, @RequestParam Optional<String> playerId) throws IOException {
-        optionalId.ifPresent(id -> model.put("id", id));
-        playerId.ifPresent(id -> model.put("id", id));
-        if (model.containsKey("id")) {
+    public String page(
+        Map<String, Object> model,
+        @PathVariable Optional<String> optionalId,
+        @RequestParam Optional<String> playerId
+    ) {
+        String uid = optionalId.orElse(playerId.orElse(null));
+        if (uid != null && uid.length() == 32) {
+            model.put("id", uid);
             Document document = reader.getDocument((String) model.get("id"));
             try {
                 model.put("name", reader.readName(document));
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
             }
         }
         return "test";
